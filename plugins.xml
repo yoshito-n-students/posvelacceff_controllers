@@ -1,6 +1,7 @@
 <library path="lib/libposvelacceff_controllers">
 
-  <class name="posvelacceff_controllers/PosVelAccEffController" type="posvelacceff_controllers::PosVelAccEffController" 
+  <class name="posvelacceff_controllers/PosVelAccEffControllerForPosVelAccEffInterface" 
+         type="posvelacceff_controllers::PosVelAccEffControllerForPosVelAccEffInterface" 
          base_class_type="controller_interface::ControllerBase">
     <description>
       This controller subscribes position, velocity, acceleration, and effort command. 
@@ -8,7 +9,26 @@
     </description>
   </class>
 
-  <class name="posvelacceff_controllers/PositionController" type="posvelacceff_controllers::PositionController" 
+  <class name="posvelacceff_controllers/PosVelAccEffControllerForPositionInterface" 
+         type="posvelacceff_controllers::PosVelAccEffControllerForPositionInterface" 
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+      This controller subscribes position, velocity, acceleration, and effort command. 
+      The controller expects a posvelacceff_command_interface::PositionJointInterface as a hardware interface.
+    </description>
+  </class>
+
+  <class name="posvelacceff_controllers/PosVelAccEffController" 
+         type="posvelacceff_controllers::PosVelAccEffController" 
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+      This controller subscribes position, velocity, acceleration, and effort command. 
+      The controller expects any hardware interface.
+    </description>
+  </class>
+
+  <class name="posvelacceff_controllers/PositionController" 
+         type="posvelacceff_controllers::PositionController" 
          base_class_type="controller_interface::ControllerBase">
     <description>
       This controller subscribes position command. 
