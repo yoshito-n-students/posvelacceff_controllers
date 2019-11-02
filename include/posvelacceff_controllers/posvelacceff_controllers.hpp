@@ -64,11 +64,6 @@ public:
       return false;
     }
 
-    // put default command
-    std::vector< double > cmd_def(4, 0.);
-    cmd_def[0] = jnt_.getPosition();
-    buf_cmd_.initRT(cmd_def);
-
     // start subscribing command
     sub_cmd_ = controller_nh.subscribe< std_msgs::Float64MultiArray >(
         "command", 1, &PosVelAccEffControllerForPosVelAccEffInterface::commandCB, this);
@@ -78,7 +73,10 @@ public:
 
   virtual void starting(const ros::Time& time)
   {
-    // nothing to do
+    // put default command
+    std::vector< double > cmd_def(4, 0.);
+    cmd_def[0] = jnt_.getPosition();
+    buf_cmd_.writeFromNonRT(cmd_def);
   }
 
   virtual void update(const ros::Time& time, const ros::Duration& period)
@@ -155,11 +153,6 @@ public:
       return false;
     }
 
-    // put default command
-    std::vector< double > cmd_def(4, 0.);
-    cmd_def[0] = jnt_.getPosition();
-    buf_cmd_.initRT(cmd_def);
-
     // start subscribing command
     sub_cmd_ = controller_nh.subscribe< std_msgs::Float64MultiArray >(
         "command", 1, &PosVelAccEffControllerForPositionInterface::commandCB, this);
@@ -169,7 +162,10 @@ public:
 
   virtual void starting(const ros::Time& time)
   {
-    // nothing to do
+    // put default command
+    std::vector< double > cmd_def(4, 0.);
+    cmd_def[0] = jnt_.getPosition();
+    buf_cmd_.writeFromNonRT(cmd_def);
   }
 
   virtual void update(const ros::Time& time, const ros::Duration& period)
