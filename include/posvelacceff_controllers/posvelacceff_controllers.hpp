@@ -81,11 +81,12 @@ public:
 
   virtual void update(const ros::Time& time, const ros::Duration& period)
   {
-    const std::vector< double >* const cmd(buf_cmd_.readFromRT());
-    jnt_.setCommandPosition((*cmd)[0]);
-    jnt_.setCommandVelocity((*cmd)[1]);
-    jnt_.setCommandAcceleration((*cmd)[2]);
-    jnt_.setCommandEffort((*cmd)[3]);
+    const std::vector< double >& cmd(*buf_cmd_.readFromRT());
+    // ad-hoc!!!!! if the profile velocity is 0, ignore the position command
+    jnt_.setCommandPosition(cmd[1] != 0. ? cmd[0] : jnt_.getPosition());
+    jnt_.setCommandVelocity(cmd[1]);
+    jnt_.setCommandAcceleration(cmd[2]);
+    jnt_.setCommandEffort(cmd[3]);
   }
 
   virtual void stopping(const ros::Time& time)
@@ -170,8 +171,9 @@ public:
 
   virtual void update(const ros::Time& time, const ros::Duration& period)
   {
-    const std::vector< double >* const cmd(buf_cmd_.readFromRT());
-    jnt_.setCommand((*cmd)[0]);
+    const std::vector< double >& cmd(*buf_cmd_.readFromRT());
+    // ad-hoc!!!!! if the profile velocity is 0, ignore the position command
+    jnt_.setCommand(cmd[1] != 0. ? cmd[0] : jnt_.getPosition());
   }
 
   virtual void stopping(const ros::Time& time)
