@@ -18,6 +18,7 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <posvelacceff_command_interface/posvelacceff_command_interface.hpp>
 
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace posvelacceff_controllers
@@ -73,6 +74,9 @@ public:
 
   virtual void starting(const ros::Time& time)
   {
+    //
+    cached_pos_ = boost::none;
+
     // put default command
     std::vector< double > cmd_def(4, 0.);
     cmd_def[0] = jnt_.getPosition();
@@ -82,9 +86,22 @@ public:
   virtual void update(const ros::Time& time, const ros::Duration& period)
   {
     const std::vector< double >& cmd(*buf_cmd_.readFromRT());
-    // ad-hoc!!!!! if the profile velocity is 0, ignore the position command
-    jnt_.setCommandPosition(cmd[1] != 0. ? cmd[0] : jnt_.getPosition());
-    jnt_.setCommandVelocity(cmd[1]);
+
+    if (cmd[1] >= 0.)
+    {
+      cached_pos_ = boost::none;
+    }
+    else
+    {
+      if (cached_pos_ == boost::none)
+      {
+        cached_pos_ = jnt_.getPosition();
+      }
+    }
+
+    // ad-hoc!!!!! if the profile velocity is negative, ignore the position command
+    jnt_.setCommandPosition(cmd[1] >= 0. ? cmd[0] : cached_pos_.get());
+    jnt_.setCommandVelocity(cmd[1] >= 0. ? cmd[1] : 0.);
     jnt_.setCommandAcceleration(cmd[2]);
     jnt_.setCommandEffort(cmd[3]);
   }
@@ -107,6 +124,7 @@ private:
 
 private:
   posvelacceff_command_interface::PosVelAccEffJointHandle jnt_;
+  boost::optional< double > cached_pos_;
 
   ros::Subscriber sub_cmd_;
   realtime_tools::RealtimeBuffer< std::vector< double > > buf_cmd_;
@@ -172,8 +190,8 @@ public:
   virtual void update(const ros::Time& time, const ros::Duration& period)
   {
     const std::vector< double >& cmd(*buf_cmd_.readFromRT());
-    // ad-hoc!!!!! if the profile velocity is 0, ignore the position command
-    jnt_.setCommand(cmd[1] != 0. ? cmd[0] : jnt_.getPosition());
+    // ad-hoc!!!!! if the profile velocity is negative, ignore the position command
+    jnt_.setCommand(cmd[1] >= 0. ? cmd[0] : jnt_.getPosition());
   }
 
   virtual void stopping(const ros::Time& time)
