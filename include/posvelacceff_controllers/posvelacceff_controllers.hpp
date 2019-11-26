@@ -181,6 +181,9 @@ public:
 
   virtual void starting(const ros::Time& time)
   {
+    //
+    cached_pos_ = boost::none;
+
     // put default command
     std::vector< double > cmd_def(4, 0.);
     cmd_def[0] = jnt_.getPosition();
@@ -190,8 +193,21 @@ public:
   virtual void update(const ros::Time& time, const ros::Duration& period)
   {
     const std::vector< double >& cmd(*buf_cmd_.readFromRT());
+
+    if (cmd[1] >= 0.)
+    {
+      cached_pos_ = boost::none;
+    }
+    else
+    {
+      if (cached_pos_ == boost::none)
+      {
+        cached_pos_ = jnt_.getPosition();
+      }
+    }
+
     // ad-hoc!!!!! if the profile velocity is negative, ignore the position command
-    jnt_.setCommand(cmd[1] >= 0. ? cmd[0] : jnt_.getPosition());
+    jnt_.setCommand(cmd[1] >= 0. ? cmd[0] : cached_pos_.get());
   }
 
   virtual void stopping(const ros::Time& time)
@@ -212,6 +228,7 @@ private:
 
 private:
   hardware_interface::JointHandle jnt_;
+  boost::optional< double > cached_pos_;
 
   ros::Subscriber sub_cmd_;
   realtime_tools::RealtimeBuffer< std::vector< double > > buf_cmd_;
